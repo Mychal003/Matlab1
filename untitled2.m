@@ -10,7 +10,10 @@ x = randn(N,1);
 
 histogram(x,50)                 % k = 50 - liczba przedziałów histogramu
 
-
+title('Histogram liczb pseudolosowych');
+xlabel('Wartość zmiennej [-]');
+ylabel('Liczność [-]');
+grid on;
 
 
 
