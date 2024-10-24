@@ -43,14 +43,9 @@ Ksw = Ksp * (Tp_nominal - TzewN) / (Tl_nominal - Tp_nominal) % Przewodność cie
 
 
 % Punkt równowagi dla Tl i Tp
-Pg0 =Pgn
-Tzew0 = TzewN
 
-%Tl_eq = (Pgn + Ksl * TzewN + Ksw * Tp_nominal) / (Ksl + Ksw)
-%Tp_eq = (Ksw * Tl_nominal + Ksp * TzewN) / (Ksw + Ksp)
-
-Tl_eq = Tl_nominal
-Tp_eq = Tp_nominal
+Tl_eq = (Pgn + Ksl * TzewN + Ksw * Tp_nominal) / (Ksl + Ksw)
+Tp_eq = (Ksw * Tl_nominal + Ksp * TzewN) / (Ksw + Ksp)
 
 %% 3. Sprawdzenie poprawności obliczeń (punkt pracy = wartości nominalne)
 

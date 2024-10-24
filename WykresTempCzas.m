@@ -11,7 +11,7 @@ Tp_nominal = 15; % Nominalna temperatura w prawym pokoju [°C]
 
 a = 2; % Współczynnik przenikania ciepła [W/°C]
 B = 5; % Grubość ściany działowej [m]
-Pgn = 10000; % Moc grzałki [W]
+Pgn = 1000; % Moc grzałki [W]
 
 % Wymiary pokoi
 x = (50 / B * 2 + 5) / 3;
@@ -21,7 +21,7 @@ Vp = B * x * 3; % Objętość prawego pokoju [m^3]
 Vl = B * y * 3; % Objętość lewego pokoju [m^3]
 
 % Parametry powietrza
-Cp = 1000; % Ciepło własciwe powietrza [J/(kg*K)]
+Cp = 1000; % Ciepło właściwe powietrza [J/(kg*K)]
 rop = 1.2; % Gęstość powietrza [kg/m^3]
 
 % Pojemności cieplne
@@ -31,31 +31,16 @@ Cvl = Cp * rop * Vl; % Pojemność cieplna lewego pokoju [J/°C]
 %% 2. Obliczenie punktu pracy (punkt równowagi)
 
 % Przewodności cieplne między pomieszczeniami
-Ksp = Pgn / (a * (Tl_nominal - TzewN) + (Tp_nominal - TzewN))
-Ksl = a * Ksp
-Ksw = Ksp * (Tp_nominal - TzewN) / (Tl_nominal - Tp_nominal) % Przewodność cieplna między pokojami
-
-
-
-
-%--------------------
-
-
+Ksp = Pgn / (a * (Tl_nominal - TzewN) + (Tp_nominal - TzewN));
+Ksl = a * Ksp;
+Ksw = Ksp * (Tp_nominal - TzewN) / (Tl_nominal - Tp_nominal); % Przewodność cieplna między pokojami
 
 % Punkt równowagi dla Tl i Tp
-Pg0 =Pgn
-Tzew0 = TzewN
-
-%Tl_eq = (Pgn + Ksl * TzewN + Ksw * Tp_nominal) / (Ksl + Ksw)
-%Tp_eq = (Ksw * Tl_nominal + Ksp * TzewN) / (Ksw + Ksp)
-
-Tl_eq = Tl_nominal
-Tp_eq = Tp_nominal
+Tl_eq = (Pgn + Ksl * TzewN + Ksw * Tp_nominal) / (Ksl + Ksw);
+Tp_eq = (Ksw * Tl_nominal + Ksp * TzewN) / (Ksw + Ksp);
 
 %% 3. Sprawdzenie poprawności obliczeń (punkt pracy = wartości nominalne)
 
-dPg = 0;
-dTzew =0;
 % Porównanie wartości obliczonych z nominalnymi
 disp('Obliczone wartości punktu pracy:');
 disp(['Temperatura w lewym pokoju (Tl_eq) = ', num2str(Tl_eq), '°C']);
@@ -72,7 +57,7 @@ else
     disp('Punkt pracy NIE zgadza się z wartościami nominalnymi.');
 end
 
-%% 4. (Opcjonalnie) Zastosowanie równań stanu
+%% 4. Zastosowanie równań stanu
 
 % Macierze równań stanu (przykład z dwoma temperaturami)
 A = [-Ksl/Cvl, Ksw/Cvl;
@@ -95,3 +80,41 @@ disp(C);
 disp('Macierz D:');
 disp(D);
 
+%% 5. Symulacja dynamiczna i wykresy
+
+% Ustal czas symulacji
+czas_symulacji = 10000;  % Czas symulacji w sekundach
+dt = 1;  % Krok czasowy
+
+% Wektory czasów
+t = 0:dt:czas_symulacji;
+
+% Inicjalizacja wektorów temperatur
+Tl = zeros(size(t)); % Temperatura w lewym pokoju
+Tp = zeros(size(t)); % Temperatura w prawym pokoju
+
+% Warunki początkowe
+Tl(1) = Tl_nominal; % Temperatura początkowa lewego pokoju
+Tp(1) = Tp_nominal; % Temperatura początkowa prawego pokoju
+
+% Symulacja dynamiczna
+for k = 2:length(t)
+    % Zmiana temperatury w lewym i prawym pokoju (Euler)
+    dT = A * [Tl(k-1); Tp(k-1)] + B * Pgn;
+    
+    % Aktualizacja temperatur
+    Tl(k) = Tl(k-1) + dT(1) * dt;
+    Tp(k) = Tp(k-1) + dT(2) * dt;
+end
+
+%% 6. Wykresy
+
+figure;
+plot(t, Tl, 'r', 'LineWidth', 2);
+hold on;
+plot(t, Tp, 'b', 'LineWidth', 2);
+xlabel('Czas [s]');
+ylabel('Temperatura [°C]');
+title('Zmiana temperatury w czasie');
+legend('Temperatura w lewym pokoju', 'Temperatura w prawym pokoju');
+grid on;
